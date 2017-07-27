@@ -1,0 +1,5 @@
+{
+  // File created to prevent conflict with PM2 NODE_APP_INSTANCE env variable
+  // Error: 
+  //  WARNING: NODE_APP_INSTANCE value of '0' did not match any instance config file names.
+}
