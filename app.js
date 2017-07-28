@@ -7,6 +7,7 @@ const mysql = require('mysql');
 const bodyParser = require('body-parser');
 
 const databaseService = require('./services/databaseService.js');
+const authService = require('./services/authService.js');
 
 app
   .use(bodyParser.json())
@@ -14,18 +15,22 @@ app
     extended: true
   }))
   .post('/auth', (req, res) => {
-    const db = new databaseService(config.get('dbConfig'));
-
     if (req.body.user === undefined || req.body.password === undefined) {
       return res.status(500).end();
     }
 
-    db.authentify(req.body.user, req.body.password);
+    const db = new databaseService(config.get('dbConfig'));
+    const auth = new authService(db);
 
-    res.setHeader('Content-Type', 'application/json');
-    res.send(JSON.stringify({
-      token: 143094309 
-    }));
+    auth.authentify(req.body.user, req.body.password)
+      .then(token => {
+        res.setHeader('Content-Type', 'application/json');
+        res.send(JSON.stringify({token}));
+      })
+      .catch(err => {
+        console.log(err);
+        res.status(403).end()
+      });
   })
   .get('/video/:videoId', (req, res) => {
     //const file = path.resolve(__dirname, 'videos', req.params.videoId);
