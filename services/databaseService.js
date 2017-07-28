@@ -1,8 +1,6 @@
 'use strict';
 
 const mysql = require('mysql');
-const sha1 = require('sha1');
-const md5 = require('md5');
 
 module.exports = class databaseService 
 {
@@ -10,48 +8,20 @@ module.exports = class databaseService
     this.conn = mysql.createConnection(dbConfig);
   }
 
-  _getSalt(user) {
+  query(sql) {
     const promise = new Promise((resolve, reject) => {
-      this.conn.query(
-      `SELECT password FROM lmds_user_data WHERE username=${this.conn.escape(user)}`,
-      (err, res) => {
+      this.conn.query(sql, (err, res) => {
         if (err) {
           return reject(err);
         }
-        if (!res.length) {
-          return reject('User not found');
-        } 
-        const password = res[0].password;
-        if (password.indexOf(':') === -1 ) {
-          return resolve('');
-        }
-        resolve(password.split(':')[1]);
+        resolve(res);
       });
     });
 
     return promise;
   }
 
-  _hashPassword(password, salt) {
-    const promise = new Promise((resolve, reject) => {
-      const saltLen = salt.length;
-
-      if (!saltLen) {
-        resolve(sha1(md5(password)));
-      } else {
-        const saltedPassword = password + salt.substr(saltLen - 1, 40 - saltLen);
-
-        resolve(`${sha1(md5(saltedPassword))}:${salt}`);
-      }
-    });
-    
-    return promise;
-  }
-
-  authentify(user, password) {
-      this
-        ._getSalt(user)
-        .then(salt => this._hashPassword(password, salt))
-        .then(hash => console.log(hash));
+  escape(value) {
+    return this.conn.escape(value);
   }
 }
