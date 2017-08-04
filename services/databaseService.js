@@ -2,7 +2,7 @@
 
 const mysql = require('mysql');
 
-module.exports = class databaseService 
+class databaseService 
 {
   constructor(dbConfig) {
     this.conn = mysql.createConnection(dbConfig);
@@ -24,4 +24,8 @@ module.exports = class databaseService
   escape(value) {
     return this.conn.escape(value);
   }
+}
+
+module.exports = (dbConfig) => {
+  return new databaseService(dbConfig);
 }

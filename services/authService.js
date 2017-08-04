@@ -1,10 +1,8 @@
-'use strict';
-
 const sha1 = require('sha1');
 const md5 = require('md5');
 const randtoken = require('rand-token');
 
-module.exports = class authService 
+class authService 
 {
   constructor(db) {
     this.db = db;
@@ -44,11 +42,11 @@ module.exports = class authService
     return promise;
   }
 
-  _auth(user, hashedPassword) {
+  _auth(username, hashedPassword) {
     const promise = new Promise((resolve, reject) => {
       this.db.query(
         `SELECT id_group FROM lmds_user_data 
-          WHERE username=${this.db.escape(user)} AND password='${hashedPassword}'`
+          WHERE username=${this.db.escape(username)} AND password='${hashedPassword}'`
       ).then(res => {
         if (!res.length) {
           return resolve(false);
@@ -61,38 +59,75 @@ module.exports = class authService
     return promise;
   }
 
+  _rmUserTokens(userGroupId) {
+    const promise = new Promise((resolve, reject) => {
+      this.db.query(`DELETE FROM lmds_pj_token where id_group=${userGroupId}`)
+        .then(() => resolve())
+        .catch(err => reject(err));
+    });
+
+    return promise;
+  } 
+
   _createToken(userGroupId) {
     const promise = new Promise((resolve, reject) => {
-      const token = randtoken.generate(8);
+      this._rmUserTokens(userGroupId)
+        .then(() => {
+          const token = randtoken.generate(8).toUpperCase();
 
-      this.db.query(
-        `INSERT INTO lmds_pj_token SET 
-          token='${token}', id_group=${userGroupId}, expire_date=NULL, classname='Core_Library_Token_Conn'`,
-      ).then(res => {
-        resolve(token);
-      })
-      .catch(err => reject(err));
+          this.db.query(
+            `INSERT INTO lmds_pj_token SET 
+              token='${token}', id_group=${userGroupId}, expire_date=NULL, classname='Core_Library_Token_Conn'`
+          )
+          .then(() => resolve(token))
+          .catch(err => reject(err));
+        })
+        .catch(err => reject(err));
     });
 
     return promise;
   }
 
   authentify(user, password) {
-      const promise = new Promise((resolve, reject) => {
-        this
-        ._getSalt(user)
-        .then(salt => this._hashPassword(password, salt))
-        .then(hashedPassword => this._auth(user, hashedPassword))
-        .then(userIdGroup => {
-          if (userIdGroup === false) {
-            return reject('Authentication failed');
-          }
-          return this._createToken(userIdGroup);
-        })
-        .then(token => resolve(token))
-        .catch(err => reject(err));
-      });
+    const promise = new Promise((resolve, reject) => {
+      this
+      ._getSalt(user)
+      .then(salt => this._hashPassword(password, salt))
+      .then(hashedPassword => this._auth(user, hashedPassword))
+      .then(userIdGroup => {
+        if (userIdGroup === false) {
+          return reject('Authentication failed');
+        }
+        return this._createToken(userIdGroup);
+      })
+      .then(token => resolve(token))
+      .catch(err => reject(err));
+    });
 
-      return promise;      
+    return promise;      
   }
+
+  rmToken(token) {
+    const promise = new Promise((resolve, reject) => {
+      this.db.query(`DELETE FROM lmds_pj_token where token=${this.db.escape(token)}`)
+        .then(() => resolve())
+        .catch(err => reject(err));
+    });
+
+    return promise;
+  }
+
+  validToken(token) {
+    const promise = new Promise((resolve, reject) => {
+      this.db.query(`SELECT id_group FROM lmds_pj_token WHERE token=${this.db.escape(token)}`)
+        .then(res => res.length === 1 ? resolve(res[0].id_group) : reject('Token not found'))
+        .catch(err => reject(err));
+    });
+
+    return promise;
+  }
+}
+
+module.exports = (db) => {
+  return new authService(db);
 }
