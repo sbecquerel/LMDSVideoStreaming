@@ -10,7 +10,7 @@ function generateThumbnails(files, index = 0) {
   const size = '320x180';
   const file = files[index];
 
-  console.log(`Generate thumbnails for file ${file}`)
+  console.log(`Generate thumbnails for file ${file} (${index}/${files.length})`)
 
   // 0508594a3bae4624153ccada40bf2e8e-320x180-1.png
   const thumbnail1 = `${path.dirname(file)}/${path.basename(file, path.extname(file))}-${size}-1.png`;
