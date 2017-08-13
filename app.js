@@ -46,11 +46,11 @@ app
         
         video.setPlayed(videoId, groupId)
           .then(() => video.getVideoPath(videoId))
-          //.then(videoPath => video.stream(req, res, videoPath))
-          .then(videoPath => {
+          .then(videoPath => video.stream(req, res, videoPath))
+          /*.then(videoPath => {
             res.setHeader('Content-Type', 'application/json');
             res.send({res: 'ok'});
-          })
+          })*/
           .catch(err => {
             console.log('Error: ', err);
             res.status(500).end();
