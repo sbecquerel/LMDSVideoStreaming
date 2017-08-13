@@ -7,8 +7,8 @@ function generateThumbnails(files, index = 0) {
 
   ffmpeg(file)
     .on('filenames', filenames => console.log('Will generate ' + filenames.join(', ')))
-    .on('end', () => generateThumbnail(files, index++))
-    .on('error', () => generateThumbnail(files, index++))
+    .on('end', () => generateThumbnails(files, index + 1))
+    .on('error', () => generateThumbnails(files, index + 1))
     .screenshots({
       // Will take screens at 20%, 40%, 60% and 80% of the video
       count: 4,
