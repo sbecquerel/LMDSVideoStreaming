@@ -2,6 +2,22 @@ const ffmpeg = require('fluent-ffmpeg');
 const path = require('path');
 const fs = require('fs');
 
+function generateThumbnails(files, index) {
+  const file = files[index];
+
+  ffmpeg(file)
+    .on('filenames', filenames => console.log('Will generate ' + filenames.join(', ')))
+    .on('end', () => generateThumbnail(files, index++))
+    .on('error', () => generateThumbnail(files, index++))
+    .screenshots({
+      // Will take screens at 20%, 40%, 60% and 80% of the video
+      count: 4,
+      folder: path.dirname(file),
+      size: '320x180',
+      filename: `${path.basename(file, path.extname(file))}-%r-%i.png`
+    });
+}
+
 function listMp4Files(dir) {
   const files = fs.readdirSync(dir);
   let result = [];
@@ -34,13 +50,4 @@ if ( ! fs.existsSync(dir)) {
 
 const files = listMp4Files(dir);
 
-files.forEach(file => ffmpeg(file)
-  .on('filenames', filenames => console.log('Will generate ' + filenames.join(', ')))
-  .on('end', () => console.log('Screenshots taken'))
-  .screenshots({
-    // Will take screens at 20%, 40%, 60% and 80% of the video
-    count: 4,
-    folder: path.dirname(file),
-    size: '320x180',
-    filename: `${path.basename(file, path.extname(file))}-%r-%i.png`
-  }));
+generateThumbnails(files);
