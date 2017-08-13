@@ -61,6 +61,27 @@ app
         res.status(403).end()
       });
   })    
+  .get('/video/:videoId/thumbnail/:index', (req, res) => {
+    const video = new videoService(db);
+    const videoId = req.params.videoId;
+    const thumbnailIndex = req.params.index;
+
+    const videoPath = video.getVideoPath(videoId)
+      .then(videoPath => {
+        const file = `${videoPath}-320x180-${thumbnailIndex}.png`;
+
+        if ( ! fs.existsSync(file)) {
+          return res.status(500).end();
+        }
+        res
+          .setHeader('Content-Type', 'image/png')
+          .send(fs.readFileSync(file));
+      })
+      .catch(err => {
+        console.log(err);
+        res.status(500).end();
+      })
+  })    
   .use((req, res, next) => {
     const authorization = req.header('Authorization');
     if (authorization === undefined) {
@@ -127,24 +148,7 @@ app
         console.log(err);
         res.status(500).end();
       });
-  })
-  .get('/video/:videoId/thumbnail/:index', (req, res) => {
-    const video = new videoService(db);
-    const videoId = req.params.videoId;
-    const thumbnailIndex = req.params.index;
-
-    const videoPath = video.getVideoPath(videoId)
-      .then(videoPath => {
-        res
-          .setHeader('Content-Type', 'image/png')
-          .send(fs.readFileSync(`${videoPath}-320x180-${thumbnailIndex}.png`));
-      })
-      .catch(err => {
-        console.log(err);
-        res.status(500).end();
-      })
-
-  })
+  })  
   .use((req, res, next) => {
     res.status(404).end();
   })
