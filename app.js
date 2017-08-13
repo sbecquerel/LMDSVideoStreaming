@@ -1,6 +1,7 @@
 const app = require('express')();
 const server = require('http').createServer(app);
 const path = require('path');
+const fs = require('fs');
 const config = require('config');
 const mysql = require('mysql');
 const bodyParser = require('body-parser');
@@ -124,8 +125,25 @@ app
       .then(() => res.status(200).end())
       .catch(err => {
         console.log(err);
-        return res.status(500).end();
+        res.status(500).end();
       });
+  })
+  .get('/video/:videoId/thumbnail/:index', (req, res) => {
+    const video = new videoService(db);
+    const videoId = req.params.videoId;
+    const thumbnailIndex = req.params.index;
+
+    const videoPath = video.getVideoPath(videoId)
+      .then(videoPath => {
+        res
+          .setHeader('Content-Type', 'image/png')
+          .send(fs.readFileSync(`${videoPath}-320x180-${thumbnailIndex}.png`));
+      })
+      .catch(err => {
+        console.log(err);
+        res.status(500).end();
+      })
+
   })
   .use((req, res, next) => {
     res.status(404).end();
