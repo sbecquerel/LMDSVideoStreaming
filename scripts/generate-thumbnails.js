@@ -51,7 +51,7 @@ function listMp4Files(dir) {
 
     if (fs.statSync(file).isDirectory()) {
       result = result.concat(listMp4Files(file));
-    } else /*if (path.extname(file) === '.mp4')*/ {
+    } else if (path.extname(file) !== '.png') {
       result.push(file);
     }
   }
@@ -75,4 +75,3 @@ const files = listMp4Files(dir);
 console.log(`Found ${files.length} files.`);
 console.log('Generate thumbnails...');
 generateThumbnails(files);
-console.log('Generation done.')
