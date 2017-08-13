@@ -3,17 +3,39 @@ const path = require('path');
 const fs = require('fs');
 
 function generateThumbnails(files, index = 0) {
+  if (files[index] === undefined) {
+    return;
+  }
+
+  const size = '320x180';
   const file = files[index];
 
+  console.log(`Generate thumbnails for file ${file}`)
+
+  // 0508594a3bae4624153ccada40bf2e8e-320x180-1.png
+  const thumbnail1 = `${path.basename(file, path.extname(file))}-${size}-1.png`;
+
+  if (fs.existsSync(thumbnail1)) {
+    console.log('Thumbnails allready exists!');
+    generateThumbnails(files, index + 1);
+    return;
+  }
+
   ffmpeg(file)
-    .on('filenames', filenames => console.log('Will generate ' + filenames.join(', ')))
-    .on('end', () => generateThumbnails(files, index + 1))
-    .on('error', () => generateThumbnails(files, index + 1))
+    //.on('filenames', filenames => console.log('Will generate: ' + filenames.join(', ')))
+    .on('end', () => {
+      console.log('Generation done');
+      generateThumbnails(files, index + 1)
+    })
+    .on('error', err => {
+      console.log(`An error occurred: ${err.message}`);
+      generateThumbnails(files, index + 1)
+    })
     .screenshots({
       // Will take screens at 20%, 40%, 60% and 80% of the video
       count: 4,
       folder: path.dirname(file),
-      size: '320x180',
+      size,
       filename: `${path.basename(file, path.extname(file))}-%r-%i.png`
     });
 }
@@ -48,6 +70,9 @@ if ( ! fs.existsSync(dir)) {
   exit(1);
 }
 
+console.log('Retrieve mp4 files...');
 const files = listMp4Files(dir);
-
+console.log(`Found ${files.length} files.`);
+console.log('Generate thumbnails...');
 generateThumbnails(files);
+console.log('Generation done.')
