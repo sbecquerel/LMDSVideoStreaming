@@ -2,7 +2,7 @@ const ffmpeg = require('fluent-ffmpeg');
 const path = require('path');
 const fs = require('fs');
 
-function generateThumbnails(files, index) {
+function generateThumbnails(files, index = 0) {
   const file = files[index];
 
   ffmpeg(file)
