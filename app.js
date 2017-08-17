@@ -61,14 +61,15 @@ app
         res.status(403).end()
       });
   })    
-  .get('/video/:videoId/thumbnail/:index', (req, res) => {
+  .get('/video/:videoId/thumbnail/:index/size/:size', (req, res) => {
     const video = new videoService(db);
     const videoId = req.params.videoId;
     const thumbnailIndex = req.params.index;
+    const thumbnailSize = req.params.size;
 
     const videoPath = video.getVideoPath(videoId)
       .then(videoPath => {
-        const file = `${videoPath}-320x180-${thumbnailIndex}.png`;
+        const file = `${videoPath}-${thumbnailSize}-${thumbnailIndex}.png`;
 
         if ( ! fs.existsSync(file)) {
           return res.status(500).end();
