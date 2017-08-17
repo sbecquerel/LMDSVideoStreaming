@@ -1,6 +1,7 @@
 const ffmpeg = require('fluent-ffmpeg');
 const path = require('path');
 const fs = require('fs');
+const im = require('imagemagick');
 
 function generateThumbnails(files, index = 0) {
   if (files[index] === undefined) {
@@ -40,6 +41,35 @@ function generateThumbnails(files, index = 0) {
     });
 }
 
+function generateSquaredThumbnails(files) {
+    const size = '320x180';
+    const squareSize = 180;
+
+    files.forEach((file) => {
+	const thumbnail1 = `${path.dirname(file)}/${path.basename(file, path.extname(file))}-${size}-1.png`;
+	if (fs.existsSync(thumbnail1)) {
+	    const squaredThumbnail = `${path.dirname(file)}/${path.basename(file, path.extname(file))}-${squareSize}x${squareSize}.png`;
+
+	    if (!fs.existsSync(squaredThumbnail)) {
+		im.crop({
+		    srcPath: thumbnail1,
+		    dstPath: squaredThumbnail,
+		    width: squareSize,
+		    height: squareSize,
+		    quality: 1,
+		    gravity: 'Center'
+		}, (err, stdout, stderr) => {
+		    if (err) {
+			console.log(`Cannot generate squared thumbmail from ${thumbnail1}`);
+		    } else {
+			console.log(`Squared thumbnail ${squaredThumbnail} generated`);
+		    }
+		});
+	    }
+	}
+    });
+}
+
 function listMp4Files(dir) {
   const files = fs.readdirSync(dir);
   let result = [];
@@ -73,5 +103,10 @@ if ( ! fs.existsSync(dir)) {
 console.log('Retrieve mp4 files...');
 const files = listMp4Files(dir);
 console.log(`Found ${files.length} files.`);
-console.log('Generate thumbnails...');
-generateThumbnails(files);
+if (process.argv[3] !== undefined && process.argv[3].trim().toLowerCase() === 'squared') {
+  console.log('Generate squared thumbnails...');
+  generateSquaredThumbnails(files);
+} else {
+  console.log('Generate thumbnails...');
+  generateThumbnails(files);
+}
