@@ -73,9 +73,8 @@ app
         if ( ! fs.existsSync(file)) {
           return res.status(500).end();
         }
-        res
-          .setHeader('Content-Type', 'image/png')
-          .send(fs.readFileSync(file));
+        res.setHeader('Content-Type', 'image/png');
+        res.send(fs.readFileSync(file));
       })
       .catch(err => {
         console.log(err);
