@@ -18,3 +18,6 @@ sudo add-apt-repository ppa:mc3man/trusty-media
 sudo apt-get update
 sudo apt-get install ffmpeg
 ```
+## Thumbnails generation
+`$ npm run generate-thumbnails /var/www/storage/lmds/`
+`$ npm run generate-thumbnails /var/www/storage/lmds/ squared`
