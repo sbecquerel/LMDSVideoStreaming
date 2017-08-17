@@ -61,7 +61,7 @@ app
         res.status(403).end()
       });
   })    
-  .get('/video/:videoId/thumbnail/:index/size/:size', (req, res) => {
+  .get('/video/:videoId/thumbnail/:size/:index?', (req, res) => {
     const video = new videoService(db);
     const videoId = req.params.videoId;
     const thumbnailIndex = req.params.index;
@@ -69,7 +69,13 @@ app
 
     const videoPath = video.getVideoPath(videoId)
       .then(videoPath => {
-        const file = `${videoPath}-${thumbnailSize}-${thumbnailIndex}.png`;
+        let file;
+        
+        if ( thumbnailIndex !== undefined ) {
+          file = `${videoPath}-${thumbnailSize}-${thumbnailIndex}.png`;
+        } else {
+          file = `${videoPath}-${thumbnailSize}.png`;
+        }
 
         if ( ! fs.existsSync(file)) {
           return res.status(500).end();
