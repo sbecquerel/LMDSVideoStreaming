@@ -6,10 +6,11 @@
 `$ pm2 ls`  
 `$ pm2 stop app`  
 `$ pm2 monit`  
+`$ pm2 logs`  
 ## Tests
 | Action          | Command                                                                                                |
 | --------------- | ------------------------------------------------------------------------------------------------------ |
-| Authentify      | `$ curl --data "user=guitare&password=guitare" http://localhost:8080/auth`                             |
+| Authentify      | `$ curl --data "username=guitare&password=guitare" http://localhost:8080/auth`                         |
 | Disconnect      | `$ curl --header "Authorization: Bearer PA4KHEEB" http://localhost:8080/logout`                        |
 | Get video list  | `$ curl --header "Authorization: Bearer 98SN7UT1" http://localhost:8080/video`                         |
 | Get video       | `$ curl --header "Authorization: Bearer 98SN7UT1" http://localhost:8080/video/42`                      |
